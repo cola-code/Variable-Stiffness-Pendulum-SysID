@@ -1,185 +1,160 @@
-# Variable-Stiffness-Pendulum-SysID
-2026.04.21started
-
-# Variable-Stiffness-Pendulum-SysID
-
-## Data-Driven System Identification for a Variable Stiffness Pendulum
+# Variable-Stiffness-Pendulum-SysID  
+**A Physics-Guided System Identification and Design Exploration Project**
 
 ---
 
-## 1. Overview
+## Abstract
 
-This project presents a **data-driven system identification framework** for a variable stiffness pendulum, combining **physics-based modeling**, **experimental data acquisition**, and **numerical optimization**.
+This project explores a simple pipeline for understanding how structural parameters affect system dynamics.
 
-A physical pendulum system with adjustable stiffness is constructed, and its dynamic behavior is captured using an IMU sensor. Unknown system parameters (damping and equivalent stiffness) are identified by minimizing the discrepancy between real-world data and simulated responses.
+Using a controllable variable-stiffness pendulum, the goal is to:
 
-Beyond parameter identification, the project further explores the **mapping between structural parameters and dynamic performance**, forming a basis for future **multi-constraint optimization** in variable stiffness systems.
+- collect real-world dynamic data  
+- estimate system parameters  
+- study the relationship between design and performance  
 
----
-
-## 2. Motivation
-
-In many engineering systems (e.g., robotics, compliant mechanisms), dynamic performance is governed by:
-
-* Structural parameters (geometry, stiffness)
-* Physical properties (mass, damping)
-* External constraints
-
-However, these parameters are often difficult to estimate directly.
-
-This project aims to:
-
-* Bridge **physical systems and data-driven modeling**
-* Enable **accurate parameter identification**
-* Lay the foundation for **design optimization**
+The project is currently in progress and focuses on system construction and data acquisition.
 
 ---
 
-## 3. System Description
+## 1. Background & Motivation
 
-### 3.1 Mechanical Structure
+In many mechanical systems, performance is not only determined by control algorithms, but also by physical structure.
 
-* Single pendulum with adjustable spring attachment point
-* Lever arm length (r) controls equivalent stiffness
-* Moment of inertia (J) computed from CAD (SolidWorks)
+A key question is:
 
-### 3.2 Sensors and Hardware
+> How do structural parameters influence dynamic behavior?
 
-* IMU: MPU6050 (pitch angle measurement)
-* Controller: Raspberry Pi / ESP32 / Arduino
-* Sampling rate: **100 Hz**
+This project combines:
 
-### 3.3 Experimental Setup
-
-* Initial condition: (\theta(0) = 30^\circ), (\dot{\theta}(0) = 0)
-* Release method: non-contact (string burn / quick release)
-* Data recorded until full decay
+- basic physics modeling  
+- experimental data  
+- simple optimization ideas  
 
 ---
 
-## 4. Mathematical Model
+## 2. System Description
 
-The system is modeled as a second-order linear dynamical system:
+The system is a pendulum with adjustable stiffness.
 
+- A spring is attached to the pendulum arm  
+- The attachment position $r$ can be changed  
+- This changes the equivalent stiffness $K_{eq}$  
+
+So the system can be described as:
+
+$$
+r \rightarrow K_{eq} \rightarrow \text{dynamic response}
+$$
+
+---
+
+## 3. Modeling Idea
+
+The pendulum is modeled as a second-order dynamic system:
+
+$$
 J \ddot{\theta} + c \dot{\theta} + K_{eq} \theta = 0
-
-Where:
-
-* (J): moment of inertia (known)
-* (c): damping coefficient (unknown)
-* (K_{eq}): equivalent stiffness (unknown)
-
----
-
-## 5. System Identification
-
-### 5.1 Simulation
-
-The dynamic system is numerically solved using:
-
-* `scipy.integrate.odeint`
-
-Given a parameter set ((c, K_{eq})), a simulated trajectory is generated.
-
----
-
-### 5.2 Optimization
-
-We estimate parameters by minimizing the mean squared error (MSE):
-
-$$
-\min_{c, K_{eq}} ; \text{MSE}(\theta_{\text{real}}, \theta_{\text{sim}})
 $$
 
-* Optimization method: `scipy.optimize.minimize`
-* Output: optimal (c^*, K_{eq}^*)
+where:
+
+- $J$: moment of inertia (estimated from CAD)  
+- $c$: damping coefficient (unknown)  
+- $K_{eq}$: equivalent stiffness (unknown)  
+
+The goal is to:
+
+1. measure motion data  
+2. estimate unknown parameters  
+3. compare model response with real data  
 
 ---
 
-## 6. Parameter–Performance Mapping
+## 4. Method Overview
 
-To extend beyond identification, we investigate how structural parameters influence system behavior:
+The overall workflow is:
 
-* Vary lever arm length (r)
-* Identify corresponding (K_{eq})
-* Analyze system response characteristics:
+### (1) Physical System Construction
+- CAD modeling (SolidWorks)  
+- inertia estimation  
+- adjustable stiffness mechanism  
 
-  * settling time
-  * damping ratio
-  * oscillation frequency
+### (2) Data Acquisition (in progress)
+- microcontroller-based sampling  
+- timestamped angle data  
+- target frequency: $100\ \text{Hz}$  
 
-Theoretical relation:
+### (3) System Identification (planned)
+- simulate system dynamics  
+- fit parameters using optimization  
+- minimize error between real data and simulation  
+
+### (4) Design Exploration (planned)
+
+We aim to analyze:
 
 $$
-K_{eq} = k_s r^2
+r \rightarrow K_{eq} \rightarrow T_s
 $$
 
-Experimental validation confirms this relationship.
+where $T_s$ is the settling time.
 
 ---
 
-## 7. Digital Twin Validation
+## 5. Current Progress
 
-A virtual model is built in Unity:
-
-* CAD model imported
-* Hinge joint configured
-* Identified parameters applied:
-
-  * stiffness → spring
-  * damping → damper
-
-The simulated motion closely matches real-world behavior, forming a **basic digital twin loop**:
-
-> Physical System → Data → Model → Simulation → Validation
+- [x] CAD model and mechanical design  
+- [x] inertia estimation from SolidWorks  
+- [x] system architecture design  
+- [ ] data acquisition implementation (in progress)  
+- [ ] experimental data collection  
+- [ ] parameter identification  
+- [ ] performance analysis  
 
 ---
 
-## 8. Results
+## 6. Project Goal
 
-* Accurate estimation of damping and stiffness parameters
-* Strong agreement between simulation and experiment
-* Linear relationship observed between (r^2) and (K_{eq})
-* Demonstration of physics-consistent data-driven modeling
+This project is not only about building a pendulum, but about learning how to:
 
----
-
-## 9. Project Structure
-
-```
-.
-├── data/                # raw and processed CSV data
-├── hardware/            # sensor code (Arduino / ESP32 / Pi)
-├── simulation/          # ODE simulation scripts
-├── optimization/        # parameter identification
-├── visualization/       # plotting and analysis
-├── unity/               # digital twin setup
-└── README.md
-```
+- connect physics, data, and modeling  
+- move from observation $\rightarrow$ model $\rightarrow$ design insight  
 
 ---
 
-## 10. Future Work
+## 7. Tech Stack
 
-This project can be extended toward:
-
-* Multi-constraint optimization (stability vs speed vs energy)
-* Real-time parameter updating (online system identification)
-* Integration with control algorithms
-* Extension to multi-DOF systems (robotic joints)
+- SolidWorks (CAD & inertia estimation)  
+- Arduino / ESP32 (data acquisition)  
+- Python (NumPy, SciPy, Matplotlib)  
+- MATLAB / Simscape (planned validation)  
 
 ---
 
-## 11. Key Takeaways
+## 8. Repository Structure
+- data # experimental data (planned)
+- src # modeling and identification code
+- hardware # CAD files and setup
+- docs # figures and notes
 
-* Combines **physics modeling + data-driven identification**
-* Demonstrates **closed-loop validation**
-* Provides a foundation for **design space exploration and optimization**
+
+---
+
+## 9. Status
+
+🚧 Early-stage (system setup & data acquisition in progress)
 
 ---
 
-## 12. Keywords
+## 10. Author
 
-Digital Twin, System Identification, Variable Stiffness, Optimization, Dynamic Systems, Robotics
+Zhang Chenming  
+Xi'an Jiaotong University  
 
 ---
+
+## Notes
+
+This is an ongoing learning-oriented project.  
+The focus is on building a clear and reproducible workflow rather than achieving perfect results.
